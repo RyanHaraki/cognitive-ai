@@ -1,7 +1,6 @@
 import React from "react";
 import { SignedOut, RedirectToSignIn } from "@clerk/nextjs";
 import Header from "@/components/Header";
-
 interface Props {
   children?:
     | string

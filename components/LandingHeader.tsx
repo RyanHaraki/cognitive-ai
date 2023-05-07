@@ -40,7 +40,12 @@ export default function LandingHeader() {
 
         <div className="hidden lg:flex lg:flex-1 lg:justify-end space-x-4">
           {user ? (
-            <UserButton />
+            <a
+              className="bg-blue-600 text-white rounded-md py-2 px-3 hover:bg-blue-700"
+              href="/dashboard"
+            >
+              Dashboard
+            </a>
           ) : (
             <div className="flex items-center space-x-4">
               <a href="/sign-in">Sign In</a>
@@ -107,7 +112,12 @@ export default function LandingHeader() {
                   Top Creators
                 </a> */}
                 {user ? (
-                  <UserButton />
+                  <a
+                    className="bg-blue-600 text-white rounded-md py-2 px-3 hover:bg-blue-700"
+                    href="/dashboard"
+                  >
+                    Dashboard
+                  </a>
                 ) : (
                   <div className="flex flex-col space-y-4 w-fit">
                     <a href="/sign-in">Sign In</a>
