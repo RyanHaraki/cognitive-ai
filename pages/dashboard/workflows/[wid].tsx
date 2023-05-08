@@ -35,6 +35,7 @@ interface Action {
 }
 
 const Workflow = () => {
+  const [workflow, setWorkflow] = useState(null);
   const [actions, setActions] = useState<Action[]>([]);
   const router = useRouter();
   const { isLoaded } = useUser();
@@ -51,6 +52,7 @@ const Workflow = () => {
         .then((res) => res.json())
         .then((data) => {
           console.log(data);
+          setWorkflow(data.workflow);
           setActions(data.workflow.actions);
         })
         .catch((err) => console.error(err));
@@ -96,15 +98,20 @@ const Workflow = () => {
 
   return (
     <AppLayout>
-      <div className="mb-16">
-        <a
-          href="/dashboard"
-          className="text-sm text-blue-500 hover:underline cursor-pointer w-fit"
-        >
-          &larr; Back to Dashboard
-        </a>
-        <h1 className="font-bold text-3xl">{dummyWorkflow.name}</h1>
-        <p className="mt-2 text-gray-600">{dummyWorkflow.description}</p>
+      <div className="flex items-start justify-between w-full">
+        <div className="mb-16">
+          <a
+            href="/dashboard"
+            className="text-sm text-blue-500 hover:underline cursor-pointer w-fit"
+          >
+            &larr; Back to Dashboard
+          </a>
+          <h1 className="font-bold text-3xl">{dummyWorkflow.name}</h1>
+          <p className="mt-2 text-gray-600">{dummyWorkflow.description}</p>
+        </div>
+        <button className="bg-black text-white rounded-md font-medium p-3 text-sm hover:bg-gray-800">
+          Integrate Workflow
+        </button>
       </div>
       <div className="w-full flex flex-col items-center mb-24">
         {/* Starting Block */}
