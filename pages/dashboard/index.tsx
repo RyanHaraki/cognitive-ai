@@ -39,7 +39,10 @@ const Dashboard = () => {
     <AppLayout>
       <div className="mb-16">
         <h1 className="font-bold text-3xl">Dashboard</h1>
-        <p>Project Description</p>
+        <p className="text-gray-600">
+          Welcome to your dashboard! You can manage all of your workflows from
+          here.
+        </p>
       </div>
 
       <h2 className="font-bold text-xl mb-4">Browse Projects </h2>

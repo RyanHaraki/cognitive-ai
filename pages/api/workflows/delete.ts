@@ -1,10 +1,8 @@
-import { createNewWorkflow } from "@/utils/db";
+import { deleteWorkflow } from "@/utils/db";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { v4 as uuidv4 } from "uuid";
 
 interface Data  {
     success: boolean;
-    workflow_id?: string;
     successMessage?: string;
     errorMessage?: any;
 }
@@ -19,19 +17,13 @@ export default async function handler(req: NextApiRequest,
           }
 
         // create payload
-        const { owner_id, name, description } = JSON.parse(req.body);
+        const { workflow_id } = JSON.parse(req.body);
 
-        const payload = {
-            workflow_id: uuidv4(),
-            owner_id: owner_id,
-            name: name,
-            description: description,
-        };
-
+        
         // add workflow to db and return success message
         try {    
-            await createNewWorkflow(payload)
-            res.status(200).json({ success: true, workflow_id: payload.workflow_id, successMessage: `Workflow ${payload.workflow_id} created` });
+            await deleteWorkflow(workflow_id);
+            res.status(200).json({ success: true, successMessage: `Workflow ${workflow_id} deleted` });
           } catch (error) {
             res.status(500).json({ success: false, errorMessage: error});
         }

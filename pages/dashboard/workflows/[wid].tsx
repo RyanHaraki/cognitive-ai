@@ -5,25 +5,8 @@ import WorkflowAction from "@/components/workflow/WorkflowAction";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/router";
 import { useUser } from "@clerk/nextjs";
-
-const dummyWorkflow = {
-  id: "1",
-  name: "Workflow 1",
-  description: "Workflow 1 description",
-  setup: {
-    input: "text",
-    prompt: "This is the prompt",
-  },
-  actions: [
-    {
-      id: "1",
-      type: "text",
-      prompt: "This is the prompt",
-      emails: [],
-      discordWebhookURL: "",
-    },
-  ],
-};
+import Modal from "@/components/UI/Modal";
+import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 
 interface Action {
   workflow_id: string;
@@ -35,8 +18,11 @@ interface Action {
 }
 
 const Workflow = () => {
-  const [workflow, setWorkflow] = useState(null);
+  const [workflow, setWorkflow] = useState<any>(null);
   const [actions, setActions] = useState<Action[]>([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [modalType, setModalType] = useState("");
+
   const router = useRouter();
   const { isLoaded } = useUser();
 
@@ -51,7 +37,6 @@ const Workflow = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
           setWorkflow(data.workflow);
           setActions(data.workflow.actions);
         })
@@ -78,6 +63,18 @@ const Workflow = () => {
     setActions(payload);
   };
 
+  // Integrate workflow
+  const integrateWorkflow = async () => {
+    const workflow_id = router.query.wid as string;
+
+    // copy workflow id to clipboard
+    navigator.clipboard.writeText(workflow_id);
+
+    router.push(
+      "https://cognitive-ai.readme.io/reference/getting-started-with-your-api-1"
+    );
+  };
+
   // Save workflow
   const saveWorkflow = async () => {
     const workflow_id = router.query.wid as string;
@@ -94,11 +91,33 @@ const Workflow = () => {
       .then((res) => res.json())
       .then((data) => console.log(data))
       .catch((err) => console.error(err));
+
+    setModalType("SAVE_WORKFLOW");
+    setModalIsOpen(true);
+  };
+
+  const promptDeleteWorkflow = async () => {
+    setModalType("DELETE_WORKFLOW");
+    setModalIsOpen(true);
+  };
+
+  const deleteWorkflow = async () => {
+    const workflow_id = router.query.wid as string;
+
+    await fetch("/api/workflows/delete", {
+      method: "POST",
+      body: JSON.stringify({ workflow_id: workflow_id }),
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.error(err));
+
+    router.push("/dashboard");
   };
 
   return (
     <AppLayout>
-      <div className="flex items-start justify-between w-full">
+      <div className="flex flex-col md:flex-row items-start justify-between w-full mb-8 md:mb-0">
         <div className="mb-16">
           <a
             href="/dashboard"
@@ -106,25 +125,51 @@ const Workflow = () => {
           >
             &larr; Back to Dashboard
           </a>
-          <h1 className="font-bold text-3xl">{dummyWorkflow.name}</h1>
-          <p className="mt-2 text-gray-600">{dummyWorkflow.description}</p>
+          <h1 className="font-bold text-3xl">{workflow?.name}</h1>
+          <p className="mt-2 text-gray-600">{workflow?.description}</p>
         </div>
-        <button className="bg-black text-white rounded-md font-medium p-3 text-sm hover:bg-gray-800">
-          Integrate Workflow
-        </button>
+        <div className="md:space-x-2 space-y-2 md:space-y-0 flex flex-col md:flex-row">
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(router.query.wid as string);
+              setModalType("COPY_WORKFLOW_ID");
+              setModalIsOpen(true);
+            }}
+            className="bg-black text-white rounded-md font-medium p-3 text-sm hover:bg-gray-800"
+          >
+            Copy Workflow ID
+            <DocumentDuplicateIcon className="h-5 w-5 ml-2 inline-block" />
+          </button>
+          <button
+            onClick={integrateWorkflow}
+            className="bg-black text-white rounded-md font-medium p-3 text-sm hover:bg-gray-800"
+          >
+            Integrate Workflow
+          </button>
+          <button
+            onClick={promptDeleteWorkflow}
+            className="bg-red-600 text-white rounded-md font-medium p-3 text-sm hover:bg-red-700"
+          >
+            Delete Workflow
+          </button>
+        </div>
       </div>
       <div className="w-full flex flex-col items-center mb-24">
         {/* Starting Block */}
-        <InputBlock
-          inputType={dummyWorkflow.setup.input}
-          prompt={dummyWorkflow.setup.prompt}
-        />
+        <InputBlock inputType={workflow?.type} prompt={workflow?.prompt} />
 
         {/* Action Blocks */}
         {actions?.map((action) => (
           <>
             <div className="w-1 h-24 bg-gray-300 my-4"></div>
-            <WorkflowAction />
+            <WorkflowAction
+              key={action.action_id}
+              id={action.action_id}
+              actions={actions}
+              setActions={setActions}
+              type={action.type}
+              prompt={action.prompt}
+            />
           </>
         ))}
 
@@ -142,6 +187,12 @@ const Workflow = () => {
           Save workflow
         </button>
       </div>
+      <Modal
+        isOpen={modalIsOpen}
+        setIsOpen={setModalIsOpen}
+        primaryFunction={deleteWorkflow}
+        type={modalType}
+      />
     </AppLayout>
   );
 };

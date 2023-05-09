@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, query, collection, where, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, query, collection, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 
 interface PayloadProps {
@@ -16,7 +16,8 @@ const createNewWorkflow = async (payload: PayloadProps) => {
     description: payload.description,
     type: "Text",
     prompt: "",
-    actions: []
+    actions: [],
+    
   });
 };
 
@@ -45,4 +46,23 @@ const getWorkflow = async (wid: string) => {
   }
 };
 
-export { createNewWorkflow, updateWorkflow, getWorkflow, getWorkflowsForUserId };
+const deleteWorkflow = async (wid: string) => {
+  await deleteDoc(doc(db, "workflows", wid));
+};
+
+const deleteAction = async (wid: string, aid: string) => {
+  const ref = doc(db, "workflows", wid);
+  const docSnap = await getDoc(ref);
+  
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    const actions = data?.actions;
+    const newActions = actions?.filter((action: any) => action.id !== aid);
+    await updateDoc(ref, { actions: newActions });
+  } else {
+    console.error("WORKFLOW DOES NOT EXIST");
+  }
+};
+
+
+export { createNewWorkflow, updateWorkflow, getWorkflow, getWorkflowsForUserId, deleteWorkflow, deleteAction };

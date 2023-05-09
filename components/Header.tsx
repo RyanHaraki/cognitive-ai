@@ -35,7 +35,13 @@ export default function Header() {
           </button>
         </div>
 
-        <div className="hidden lg:flex lg:flex-1 lg:justify-end space-x-4">
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:items-center space-x-4">
+          <a
+            href="/dashboard"
+            className=" block rounded-lg px-3 py-1 font-semibold leading-7 text-gray-500 hover:bg-gray-50"
+          >
+            Dashboard
+          </a>
           <UserButton />
         </div>
       </nav>
@@ -67,30 +73,13 @@ export default function Header() {
             <div className="-my-6 divide-y divide-gray-500/10">
               <div className="space-y-2 py-6">
                 <a
-                  href="#"
+                  href="/dashboard"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-500 hover:bg-gray-50
                   "
                 >
-                  Explore Exclusive
+                  Dashboard
                 </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-500 hover:bg-gray-50"
-                >
-                  Trending
-                </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-500 hover:bg-gray-50"
-                >
-                  Live
-                </a>
-                <a
-                  href="#"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-500 hover:bg-gray-50]"
-                >
-                  Top Creators
-                </a>
+
                 <UserButton />
               </div>
             </div>

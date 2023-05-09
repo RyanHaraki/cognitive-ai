@@ -1,15 +1,63 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 
-const WorkflowAction = () => {
+interface Props {
+  id: string;
+  type: string;
+  prompt: string;
+  emails?: string[];
+  discordWebhookURL?: string;
+  actions: any;
+  setActions: any;
+}
+
+const WorkflowAction = ({
+  id,
+  type,
+  prompt,
+  actions,
+  setActions,
+  emails,
+  discordWebhookURL,
+}: Props) => {
   const [actionType, setActionType] = useState("text");
-  const [textPrompt, setTextPrompt] = useState("");
-  const [imagePrompt, setImagePrompt] = useState("");
-  const [emailPrompt, setEmailPrompt] = useState("");
+  const [actionPrompt, setActionPrompt] = useState("");
   const [emailRecipients, setEmailRecipients] = useState("");
   const [discordWebhook, setDiscordWebhook] = useState("");
-  const [discordPrompt, setDiscordPrompt] = useState("");
-  const [codePrompt, setCodePrompt] = useState("");
+
+  useEffect(() => {
+    setActionType(type);
+    setActionPrompt(prompt);
+    setEmailRecipients(emails ? emails.join(",") : "");
+    setDiscordWebhook(discordWebhookURL ? discordWebhookURL : "");
+  }, []);
+
+  const deleteAction = () => {
+    const newActions = actions.filter((action: any) => action.action_id !== id);
+    setActions(newActions);
+  };
+
+  const updateAction = (
+    newActionType: string,
+    newActionPrompt: string,
+    newEmailRecipients: string,
+    newDiscordWebhook: string
+  ) => {
+    const newActions = actions.map((action: any) => {
+      if (action.action_id === id) {
+        return {
+          ...action,
+          type: newActionType,
+          prompt: newActionPrompt,
+          emails: newEmailRecipients.split(","),
+          discordWebhookURL: newDiscordWebhook,
+        };
+      } else {
+        return action;
+      }
+    });
+    setActions(newActions);
+  };
 
   const renderActionDetails = () => {
     switch (actionType) {
@@ -20,11 +68,6 @@ const WorkflowAction = () => {
             <p className="text-gray-500 mb-2 text-sm">
               Enter the prompt you want to use to generate text
             </p>
-            <textarea
-              value={textPrompt}
-              onChange={(e) => setTextPrompt(e.target.value)}
-              className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-            ></textarea>
           </div>
         );
       case "image":
@@ -34,15 +77,8 @@ const WorkflowAction = () => {
             <p className="text-gray-500 mb-2 text-sm">
               Enter the prompt you want to use to generate the image
             </p>
-            <textarea
-              value={imagePrompt}
-              onChange={(e) => setImagePrompt(e.target.value)}
-              className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-            ></textarea>
           </div>
         );
-      case "fine-tune":
-        return <h1>comin soon</h1>;
       case "email":
         return (
           <div>
@@ -55,19 +91,23 @@ const WorkflowAction = () => {
               type="text"
               className="w-full p-2 mb-4 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
               value={emailRecipients}
-              onChange={(e) => setEmailRecipients(e.target.value)}
+              placeholder="jane@doe.com, bob@website.com"
+              onChange={(e) => {
+                const newEmailRecipients = e.target.value;
+                setEmailRecipients(newEmailRecipients);
+                updateAction(
+                  actionType,
+                  actionPrompt,
+                  newEmailRecipients,
+                  discordWebhook
+                );
+              }}
             />
-
             <p>Email Prompt</p>
             <p className="text-gray-500 mb-2 text-sm">
               Enter the prompt you want to use to generate the email. It will
               automatically create a subject and header.
             </p>
-            <textarea
-              value={emailPrompt}
-              onChange={(e) => setEmailPrompt(e.target.value)}
-              className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-            ></textarea>
           </div>
         );
       case "discord":
@@ -78,22 +118,25 @@ const WorkflowAction = () => {
               Enter the Discord Webhook URL you want to send the message to
             </p>
             <input
-              value={discordWebhook}
-              onChange={(e) => setDiscordWebhook(e.target.value)}
               type="text"
               className="w-full p-2 mb-4 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-              placeholder="https://discord.com/api/webhooks/..."
+              value={emailRecipients}
+              onChange={(e) => {
+                const newDiscordWebhook = e.target.value;
+                setDiscordWebhook(newDiscordWebhook);
+                updateAction(
+                  actionType,
+                  actionPrompt,
+                  emailRecipients,
+                  newDiscordWebhook
+                );
+              }}
             />
 
             <p>Message Prompt</p>
             <p className="text-gray-500 mb-2 text-sm">
               Enter the prompt you want to use to generate the message.
             </p>
-            <textarea
-              value={discordPrompt}
-              onChange={(e) => setDiscordPrompt(e.target.value)}
-              className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-            ></textarea>
           </div>
         );
       case "code":
@@ -103,11 +146,6 @@ const WorkflowAction = () => {
             <p className="text-gray-500 mb-2 text-sm">
               Enter the prompt you want to use to generate the code.
             </p>
-            <textarea
-              value={codePrompt}
-              onChange={(e) => setCodePrompt(e.target.value)}
-              className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-            ></textarea>
           </div>
         );
 
@@ -122,14 +160,33 @@ const WorkflowAction = () => {
         <h2 className="font-medium text-2xl">Action</h2>
         <p className="text-gray-500 mb-2 text-sm">Do this...</p>
       </div>
-      <p>Type</p>
-      <p className="text-gray-500 mb-2 text-sm">
-        Select the type of action you want to perform
-      </p>
+      <div className="flex w-full justify-between">
+        <div>
+          <p>Type</p>
+          <p className="text-gray-500 mb-2 text-sm">
+            Select the type of action you want to perform
+          </p>
+        </div>
+        <div>
+          <button
+            onClick={deleteAction}
+            className="bg-red-500 text-white px-4 py-2 rounded-md shadow-sm text-sm"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+
       <select
         onChange={(e) => {
-          setActionType(e.target.value);
-          console.log(actionType);
+          const newActionType = e.target.value;
+          setActionType(newActionType);
+          updateAction(
+            newActionType,
+            actionPrompt,
+            emailRecipients,
+            discordWebhook
+          );
         }}
         className="p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm mb-4"
       >
@@ -141,7 +198,22 @@ const WorkflowAction = () => {
         <option value="discord">Send Discord Message</option>
         {/* <option value="slack">Send Slack Message</option> */}
       </select>
+      {/* Render the action details here */}
       {renderActionDetails()}
+      <textarea
+        value={actionPrompt}
+        onChange={(e) => {
+          const newActionPrompt = e.target.value;
+          setActionPrompt(newActionPrompt);
+          updateAction(
+            actionType,
+            newActionPrompt,
+            emailRecipients,
+            discordWebhook
+          );
+        }}
+        className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
+      ></textarea>
     </div>
   );
 };
