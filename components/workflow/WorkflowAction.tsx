@@ -37,6 +37,7 @@ const WorkflowAction = ({
     setActions(newActions);
   };
 
+  // TODO: update action to use a payload instead of individual params
   const updateAction = (
     newActionType: string,
     newActionPrompt: string,
@@ -79,66 +80,66 @@ const WorkflowAction = ({
             </p>
           </div>
         );
-      case "email":
-        return (
-          <div>
-            <p>Email</p>
-            <p className="text-gray-500 mb-2 text-sm">
-              Enter the email address(es) you want to send the email to,
-              separated by commas
-            </p>
-            <input
-              type="text"
-              className="w-full p-2 mb-4 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-              value={emailRecipients}
-              placeholder="jane@doe.com, bob@website.com"
-              onChange={(e) => {
-                const newEmailRecipients = e.target.value;
-                setEmailRecipients(newEmailRecipients);
-                updateAction(
-                  actionType,
-                  actionPrompt,
-                  newEmailRecipients,
-                  discordWebhook
-                );
-              }}
-            />
-            <p>Email Prompt</p>
-            <p className="text-gray-500 mb-2 text-sm">
-              Enter the prompt you want to use to generate the email. It will
-              automatically create a subject and header.
-            </p>
-          </div>
-        );
-      case "discord":
-        return (
-          <div>
-            <p>Discord Webhook URL</p>
-            <p className="text-gray-500 mb-2 text-sm">
-              Enter the Discord Webhook URL you want to send the message to
-            </p>
-            <input
-              type="text"
-              className="w-full p-2 mb-4 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
-              value={emailRecipients}
-              onChange={(e) => {
-                const newDiscordWebhook = e.target.value;
-                setDiscordWebhook(newDiscordWebhook);
-                updateAction(
-                  actionType,
-                  actionPrompt,
-                  emailRecipients,
-                  newDiscordWebhook
-                );
-              }}
-            />
+      // case "email":
+      //   return (
+      //     <div>
+      //       <p>Email</p>
+      //       <p className="text-gray-500 mb-2 text-sm">
+      //         Enter the email address(es) you want to send the email to,
+      //         separated by commas
+      //       </p>
+      //       <input
+      //         type="text"
+      //         className="w-full p-2 mb-4 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
+      //         value={emailRecipients}
+      //         placeholder="jane@doe.com, bob@website.com"
+      //         onChange={(e) => {
+      //           const newEmailRecipients = e.target.value;
+      //           setEmailRecipients(newEmailRecipients);
+      //           updateAction(
+      //             actionType,
+      //             actionPrompt,
+      //             newEmailRecipients,
+      //             discordWebhook
+      //           );
+      //         }}
+      //       />
+      //       <p>Email Prompt</p>
+      //       <p className="text-gray-500 mb-2 text-sm">
+      //         Enter the prompt you want to use to generate the email. It will
+      //         automatically create a subject and header.
+      //       </p>
+      //     </div>
+      //   );
+      // case "discord":
+      //   return (
+      //     <div>
+      //       <p>Discord Webhook URL</p>
+      //       <p className="text-gray-500 mb-2 text-sm">
+      //         Enter the Discord Webhook URL you want to send the message to
+      //       </p>
+      //       <input
+      //         type="text"
+      //         className="w-full p-2 mb-4 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
+      //         value={emailRecipients}
+      //         onChange={(e) => {
+      //           const newDiscordWebhook = e.target.value;
+      //           setDiscordWebhook(newDiscordWebhook);
+      //           updateAction(
+      //             actionType,
+      //             actionPrompt,
+      //             emailRecipients,
+      //             newDiscordWebhook
+      //           );
+      //         }}
+      //       />
 
-            <p>Message Prompt</p>
-            <p className="text-gray-500 mb-2 text-sm">
-              Enter the prompt you want to use to generate the message.
-            </p>
-          </div>
-        );
+      //       <p>Message Prompt</p>
+      //       <p className="text-gray-500 mb-2 text-sm">
+      //         Enter the prompt you want to use to generate the message.
+      //       </p>
+      //     </div>
+      //   );
       case "code":
         return (
           <div>
@@ -178,6 +179,7 @@ const WorkflowAction = ({
       </div>
 
       <select
+        value={actionType}
         onChange={(e) => {
           const newActionType = e.target.value;
           setActionType(newActionType);
@@ -194,8 +196,8 @@ const WorkflowAction = ({
         <option value="image">Generate Image</option>
         {/* <option value="fine-tune">Fine-Tune Image</option> */}
         <option value="code">Generate Code</option>
-        <option value="email">Send Email</option>
-        <option value="discord">Send Discord Message</option>
+        {/* <option value="email">Send Email</option> */}
+        {/* <option value="discord">Send Discord Message</option> */}
         {/* <option value="slack">Send Slack Message</option> */}
       </select>
       {/* Render the action details here */}

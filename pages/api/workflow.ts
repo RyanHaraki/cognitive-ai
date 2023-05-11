@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { OpenAIApi, Configuration } from 'openai';
 import { getWorkflow } from '@/utils/db';
-import { DocumentData } from 'firebase/firestore';
+
 
 // return value from executing a workflow
 interface Data  {
@@ -18,66 +18,81 @@ const openai = new OpenAIApi(configuration);
 
 // TODO: add authentication
 // TODO: get request to DB to get workflow, then execute it
+// action types: text, image, code, email, discord
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-
-
   if (req.method !== 'POST') {
     res.status(405).send({ success: false, errorMessage: 'Only POST requests allowed' })
     return;
   }
 
-  const { workflowId } = JSON.parse(req.body);
-
-  try {
-  // get the workflow from the DB
+  const { workflowId, input } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  
   const workflow = await getWorkflow(workflowId).then(
     (workflow) => {
       return workflow;
     }
   ).catch((error) => {
-    console.log("ERROR: ", error);
-  })
+    res.status(400).json({ success: false, errorMessage: error}) 
+  });
 
-  // execute the workflow
-  if (workflow) {
-      const actions = workflow!.actions;
-
-      const response = await openai.createCompletion({
-        model: "text-davinci-003",
-        prompt: actions[0].value,
-        temperature: 0.7,
-        max_tokens: 250,
-      });
-        
-      res.status(200).json({ success: true, response: response.data.choices.pop()!.text});
-  } else {
-    res.status(500).json({ success: false, errorMessage: `Workflow ${workflowId} not found`});
+  let output = input;
+  for (const action of workflow!.actions) {
+    switch (action.type) {
+      case 'text':
+        const textResponse = await openai.createCompletion({
+          model: 'davinci',
+          prompt: `${output}\n${action.prompt}`,
+          max_tokens: 2048,
+          temperature: action.temperature || 0.5,
+          n: action.n || 1,
+          stop: action.stop || '\n'
+        });
+        output = textResponse.data.choices[0].text?.trim();
+        break;
+      case 'image':
+        const imageResponse = await openai.createImage({
+          prompt: `${output}\n${action.prompt}`,
+          size: '1024x1024'
+        });
+        output = imageResponse.data.data[0].url;
+        break;
+      case 'code':
+        const codeResponse = await openai.createCompletion({
+          model: 'davinci-codex',
+          prompt: `${output}\n${action.prompt}`,
+          max_tokens: 1024,
+          temperature: 0.5,
+          n: action.n || 1,
+          stop: action.stop || '\n'
+        });
+        output = codeResponse.data.choices[0].text?.trim();
+        break;
+      case 'email':
+        const emails = action.emails.split(',');
+        await sendEmail(output, emails);
+        break;
+      case 'discord':
+        await sendDiscordMessage(output, action.webhookUrl);
+        break;
+      default:
+        throw new Error(`Invalid action type: ${action.type}`);
+    }
   }
 
-    // let data = "";
+  res.status(200).json({ success: true, response: output });  
 
-  //   inputs.forEach(async (input: any) => {
-  //     if (input.type === 'text') {
-  //       const response = await openai.createCompletion({
-  //         model: "text-davinci-003",
-  //         prompt: input.value,
-  //         temperature: 0.9,
-  //         max_tokens: 150,
-  //         top_p: 1,
-  //         frequency_penalty: 0.0,
-  //         presence_penalty: 0.6,
-  //         // stop: [" Human:", " AI:"],
-  //       });
-  //       data = response.data.choices[0].text || "";
-  // }})
-
-  // res.status(200).json({ success: true, response: workflow?.actions});
+  async function sendEmail(output: string, emails: string[]) {
+    // Implement email sending logic here
     
-  } catch (error) {
-    res.status(500).json({ success: false, errorMessage: error});
+    console.log(output, emails);
+  }
+  
+  async function sendDiscordMessage(output: string, webhookUrl: string) {
+    // Implement Discord message sending logic here
+    console.log(output, webhookUrl);
   }
 
 }

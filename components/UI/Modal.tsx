@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 
 interface ModalOptions {
   isOpen: boolean;
@@ -91,7 +91,7 @@ export default function Modal({
             as="h3"
             className="text-lg font-bold font-almarai leading-6 text-gray-900 "
           >
-            Workflow ID Copied!!
+            Workflow ID Copied!
           </Dialog.Title>
 
           {/* BODY */}

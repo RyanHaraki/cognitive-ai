@@ -36,11 +36,12 @@ const InputBlock = ({ inputType, prompt }: Props) => {
       </div>
       {/* Workflow Prompt */}
       <div>
-        <p>Workflow Prompt</p>
+        <p>Workflow Prompt (optional)</p>
         <p className="text-gray-500 mb-2 text-sm">
           The following prompt will define the behavior of your workflow
         </p>
         <textarea
+        placeholder="You are an AI chatbot for a customer support team. You are asked to help a customer with a problem..."
           value={workflowPrompt}
           onChange={(e) => setWorkflowPrompt(e.target.value)}
           className="w-full h-24 p-2 rounded-md shadow-sm border border-solid border-gray-200 text-sm"
