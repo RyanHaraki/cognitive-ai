@@ -16,7 +16,7 @@ const configuration = new Configuration({
 
 const openai = new OpenAIApi(configuration);
 
-// TODO: add authentication
+// TODO: add authentication (api keys)
 // TODO: get request to DB to get workflow, then execute it
 // action types: text, image, code, email, discord
 export default async function handler(
@@ -43,12 +43,10 @@ export default async function handler(
     switch (action.type) {
       case 'text':
         const textResponse = await openai.createCompletion({
-          model: 'davinci',
+          model: 'text-davinci-003',
           prompt: `${output}\n${action.prompt}`,
           max_tokens: 2048,
           temperature: action.temperature || 0.5,
-          n: action.n || 1,
-          stop: action.stop || '\n'
         });
         output = textResponse.data.choices[0].text?.trim();
         break;
@@ -61,12 +59,10 @@ export default async function handler(
         break;
       case 'code':
         const codeResponse = await openai.createCompletion({
-          model: 'davinci-codex',
-          prompt: `${output}\n${action.prompt}`,
+          model: 'text-davinci-003',
+          prompt: `You are a model trained to write code. Your response MUST be valid code based on the prompt that you have been given.\n${output}\n${action.prompt}.`,
           max_tokens: 1024,
           temperature: 0.5,
-          n: action.n || 1,
-          stop: action.stop || '\n'
         });
         output = codeResponse.data.choices[0].text?.trim();
         break;

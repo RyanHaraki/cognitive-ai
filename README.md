@@ -7,3 +7,4 @@ Hello
 - discord messages
 - slack messages
 - refactor workflow actions
+- NPM package
