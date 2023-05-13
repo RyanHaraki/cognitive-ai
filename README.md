@@ -1,6 +1,6 @@
 ### Todo
 
-- [] rate limiting
+- [x] rate limiting
 - [x] API keys
 - [x] optional prompts
 - [] emails
