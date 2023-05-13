@@ -11,6 +11,13 @@ interface Props {
   setActions: any;
 }
 
+interface ActionData {
+  type: string;
+  prompt: string;
+  emailRecipients?: string[];
+  discordWebhookURL?: string;
+}
+
 const WorkflowAction = ({
   id,
   type,
@@ -44,7 +51,7 @@ const WorkflowAction = ({
     newEmailRecipients: string,
     newDiscordWebhook: string
   ) => {
-    const newActions = actions.map((action: any) => {
+    const newActions = actions.map((action: any, data: any) => {
       if (action.action_id === id) {
         return {
           ...action,

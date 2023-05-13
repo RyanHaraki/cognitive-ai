@@ -1,11 +1,24 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { OpenAIApi, Configuration } from 'openai';
 import { getWorkflow, getAPIKeyFromKey } from '@/utils/db';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+    url: process.env.NEXT_UPSTASH_REDIS_REST_TOKEN!,
+    token: process.env.NEXT_UPSTASH_REDIS_REST_TOKEN!,
+  })
+
+// Rate Limiter
+const ratelimit = new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.fixedWindow(5, "5 s"),
+  });
 
 // return value from executing a workflow
 interface Data  {
   success: boolean;
-  errorMessage?: any;
+  errorMessage?: string;
   response?: any;
 }
 
@@ -21,7 +34,17 @@ const openai = new OpenAIApi(configuration);
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
-) {
+  ) {
+  const identifier = "api";
+  const result = await ratelimit.limit(identifier);
+  res.setHeader('X-RateLimit-Limit', result.limit)
+  res.setHeader('X-RateLimit-Remaining', result.remaining)
+
+  if (!result.success) {
+    res.status(429).send({ success: false, errorMessage: 'Too many requests, please wait before trying again' })
+    return;
+  }
+
   if (req.method !== 'POST') {
     res.status(405).send({ success: false, errorMessage: 'Only POST requests allowed' })
     return;
@@ -34,7 +57,7 @@ export default async function handler(
     res.status(401).json({ success: false, errorMessage: 'No API key provided' });
     return;
   } 
-
+ 
   const apiKeyData = await getAPIKeyFromKey(apiKey);
   if (apiKeyData.length === 0) {
       res.status(401).json({ success: false, errorMessage: 'Invalid API key' });
