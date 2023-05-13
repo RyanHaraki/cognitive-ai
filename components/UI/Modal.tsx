@@ -4,7 +4,7 @@ import { Fragment } from "react";
 interface ModalOptions {
   isOpen: boolean;
   setIsOpen: (param: boolean) => void;
-  primaryFunction: () => void;
+  primaryFunction?: () => void;
   type: string; // "SAVE_WORKFLOW" | "DELETE_WORKFLOW" | "INTEGRATE_WORKFLOW"
 }
 
@@ -41,7 +41,7 @@ export default function Modal({
               className="inline-flex justify-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 text-white hover:bg-red-700 transition ease-in-out"
               onClick={() => {
                 closeModal();
-                primaryFunction();
+                primaryFunction && primaryFunction();
               }}
             >
               Delete Workflow
@@ -92,6 +92,32 @@ export default function Modal({
             className="text-lg font-bold font-almarai leading-6 text-gray-900 "
           >
             Workflow ID Copied!
+          </Dialog.Title>
+
+          {/* BODY */}
+          <div className="mt-2 flex flex-col space-y-4"></div>
+
+          <div className="mt-4 space-x-2">
+            <button
+              type="button"
+              className="inline-flex justify-center rounded-md bg-blue-100 text-blue-500 px-4 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 hover:bg-blue-200 transition ease-in-out"
+              onClick={() => {
+                closeModal();
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </Dialog.Panel>
+      );
+    } else if (type == "COPY_API_KEY") {
+      return (
+        <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+          <Dialog.Title
+            as="h3"
+            className="text-lg font-bold font-almarai leading-6 text-gray-900 "
+          >
+            API Key Copied!
           </Dialog.Title>
 
           {/* BODY */}

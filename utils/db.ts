@@ -1,5 +1,6 @@
 import { doc, getDoc, setDoc, updateDoc, query, collection, where, getDocs, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import { v4 as uuidv4 } from "uuid";
 
 interface PayloadProps {
   workflow_id: string;
@@ -64,5 +65,42 @@ const deleteAction = async (wid: string, aid: string) => {
   }
 };
 
+const createAPIKey = async (uid: string) => {
+  const ref = doc(db, "api_keys", uid);
+  const docSnap = await getDoc(ref);
 
-export { createNewWorkflow, updateWorkflow, getWorkflow, getWorkflowsForUserId, deleteWorkflow, deleteAction };
+  if (docSnap.exists()) {
+    console.error("API KEY ALREADY EXISTS");
+  } else {
+    await setDoc(ref, {
+      uid: uid,
+      key: `sk-${uuidv4()}`,
+    });
+  }
+}
+
+const getAPIKey = async (uid: string) => {
+  const ref = doc(db, "api_keys", uid);
+  const docSnap = await getDoc(ref);
+
+  if (docSnap.exists()) {
+    return docSnap.data();
+  }
+  
+}  
+
+const getAPIKeyFromKey = async (key: string) => {
+  const q = query(collection(db, "api_keys"), where("key", "==", key));
+  const querySnapshot = await getDocs(q);
+  const data = querySnapshot.docs.map((doc) => doc.data());
+  return data;
+}
+
+const deleteAPIKey = async (uid: string) => {
+  await deleteDoc(doc(db, "api_keys", uid));
+};
+
+
+  
+
+export { createNewWorkflow, updateWorkflow, getWorkflow, getWorkflowsForUserId, deleteWorkflow, deleteAction, createAPIKey, getAPIKey, getAPIKeyFromKey, deleteAPIKey };

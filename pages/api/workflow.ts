@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { OpenAIApi, Configuration } from 'openai';
-import { getWorkflow } from '@/utils/db';
-
+import { getWorkflow, getAPIKeyFromKey } from '@/utils/db';
 
 // return value from executing a workflow
 interface Data  {
@@ -28,10 +27,33 @@ export default async function handler(
     return;
   }
 
+  const apiKey = req.headers['authorization'];
+  
+  // check if api key is valid
+  if (apiKey === undefined) {
+    res.status(401).json({ success: false, errorMessage: 'No API key provided' });
+    return;
+  } 
+
+  const apiKeyData = await getAPIKeyFromKey(apiKey);
+  if (apiKeyData.length === 0) {
+      res.status(401).json({ success: false, errorMessage: 'Invalid API key' });
+      return;
+    } 
+
+    if (apiKeyData[0].key !== apiKey) {
+      res.status(401).json({ success: false, errorMessage: 'Invalid API key' });
+      return;
+    }
+    
   const { workflowId, input } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   
+  // get workflow from DB
   const workflow = await getWorkflow(workflowId).then(
     (workflow) => {
+      if (workflow === undefined) {
+        res.status(400).json({ success: false, errorMessage: 'Workflow not found' })  
+      }
       return workflow;
     }
   ).catch((error) => {

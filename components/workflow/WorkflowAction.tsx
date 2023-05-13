@@ -65,18 +65,18 @@ const WorkflowAction = ({
       case "text":
         return (
           <div>
-            <p>Text Prompt</p>
+            <p>Text Rules</p>
             <p className="text-gray-500 mb-2 text-sm">
-              Enter the prompt you want to use to generate text
+              Enter the prompt to set the rules for the text generation
             </p>
           </div>
         );
       case "image":
         return (
           <div>
-            <p>Image Prompt</p>
+            <p>Image Rules</p>
             <p className="text-gray-500 mb-2 text-sm">
-              Enter the prompt you want to use to generate the image
+              Enter the prompt to set rules for the image generation
             </p>
           </div>
         );
@@ -143,9 +143,9 @@ const WorkflowAction = ({
       case "code":
         return (
           <div>
-            <p>Code Prompt</p>
+            <p>Code Rules</p>
             <p className="text-gray-500 mb-2 text-sm">
-              Enter the prompt you want to use to generate the code.
+              Enter the prompt to set rules for the code generation
             </p>
           </div>
         );
