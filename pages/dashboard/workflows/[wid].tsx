@@ -71,7 +71,7 @@ const Workflow = () => {
     navigator.clipboard.writeText(workflow_id);
 
     router.push(
-      "https://cognitive-ai.readme.io/reference/getting-started-with-your-api-1"
+      "https://cognitive-ai.readme.io/reference/cognitive-quickstart"
     );
   };
 
