@@ -35,15 +35,17 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
   ) {
-  const identifier = "api";
-  const result = await ratelimit.limit(identifier);
-  res.setHeader('X-RateLimit-Limit', result.limit)
-  res.setHeader('X-RateLimit-Remaining', result.remaining)
+    console.log("STARTED")
+  // const identifier = "api";
+  // const result = await ratelimit.limit(identifier);
+  // res.setHeader('X-RateLimit-Limit', result.limit)
+  // res.setHeader('X-RateLimit-Remaining', result.remaining)
+  console.log("RATE LIMITED")
 
-  if (!result.success) {
-    res.status(429).send({ success: false, errorMessage: 'Too many requests, please wait before trying again' })
-    return;
-  }
+  // if (!result.success) {
+  //   res.status(429).send({ success: false, errorMessage: 'Too many requests, please wait before trying again' })
+  //   return;
+  // }
 
   if (req.method !== 'POST') {
     res.status(405).send({ success: false, errorMessage: 'Only POST requests allowed' })
@@ -69,6 +71,7 @@ export default async function handler(
       return;
     }
     
+    console.log("CHECKS DONE")
   const { workflowId, input } = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
   
   // get workflow from DB
@@ -82,6 +85,7 @@ export default async function handler(
   ).catch((error) => {
     res.status(400).json({ success: false, errorMessage: error}) 
   });
+  console.log("GOT WORKFLOW")
 
   let output = input;
   for (const action of workflow!.actions) {
@@ -106,7 +110,7 @@ export default async function handler(
         const codeResponse = await openai.createCompletion({
           model: 'text-davinci-003',
           prompt: `You are a model trained to write code. Your response MUST be valid code based on the prompt that you have been given.\n${output}\n${action.prompt}.`,
-          max_tokens: 1024,
+          max_tokens: 25,
           temperature: 0.5,
         });
         output = codeResponse.data.choices[0].text?.trim();
@@ -122,6 +126,7 @@ export default async function handler(
         throw new Error(`Invalid action type: ${action.type}`);
     }
   }
+
 
   res.status(200).json({ success: true, response: output });  
 
